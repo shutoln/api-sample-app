@@ -2,7 +2,14 @@ class OrganizationsController < ApplicationController
   before_action :set_organization, only: [:show, :edit, :update, :destroy]
 
   def index
-    organizations = Organization.all
+    if params[:fields].present?
+      requested = params[:fields].split(',').map(&:strip)
+      required = %w[id updated_at created_at]
+      allowed = (requested + required) & Organization.column_names
+      organizations = Organization.select(allowed.uniq)
+    else
+      organizations = Organization.all
+    end
     render json: organizations
   end
 
